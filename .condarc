@@ -1,0 +1,6 @@
+channels:
+  - conda-forge
+channel_priority: strict
+number_channel_notices: 0
+default_channels:
+  - https://conda.anaconda.org/conda-forge

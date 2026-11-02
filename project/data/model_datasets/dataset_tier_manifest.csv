@@ -1,0 +1,10 @@
+tier,file,rows,label_status,role,reason
+gold,danawa_dogfood.csv,2470,1830 rows have parsed function labels,primary training source,Large Korean catalogue with function labels plus nutrition ingredients price and review fields
+gold,zooplus_dog_food.csv,3551,1690 rows have function labels,primary training source,Large labelled catalogue with rich ingredients descriptions variants and nutrition fields
+gold,petsathome_dog_food.csv,1595,670 rows have function labels,primary training source,Structured function labels plus near-complete ingredients and product attributes
+gold,petsmart_dryfood_product.csv,838,479 curated labels,primary training source,Product-level curated health labels with rich nutrition and ingredient fields
+silver,purina_uk_dog_food.csv,119,42 rows have function labels,secondary training or external validation,Small source and includes a material share of treats
+unlabeled,dog_food_nutrition_disclosed_lifeofepic_dry_2026-10-28.csv,799,no function labels,model inference target,Good nutrition and ingredient coverage but no target categories
+unlabeled,dogpre_dog_food_nutrition_2026-10-28_idx1150-1269.csv,37,no function labels,feature and inference support,Rich core nutrition but very small partial collection with no target categories
+unlabeled,en.openpetfoodfacts.org.products.csv,15136,no function labels,scope review and inference support,Multi-species external data with sparse fields and no health-function target labels
+unlabeled,petsmart_dryfood_sku.csv,1615,inherits product labels but not independent,variant and price enrichment,SKU rows duplicate the 838 product masters and would leak across train and test

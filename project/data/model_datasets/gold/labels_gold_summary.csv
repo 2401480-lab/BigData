@@ -1,9 +1,0 @@
-﻿metric,value
-gold_products,4711
-label_evidence_rows,8580
-normalized_label_rows,8541
-products_with_any_mapped_label,4711
-primary_label_rows,5558
-products_with_primary_label,3288
-unmapped_label_rows,0
-unmapped_distinct_raw_labels,0

@@ -1,4 +1,6 @@
-# 기능 카테고리 학습 데이터셋 구성
+# 기능 카테고리 학습 데이터셋 구성 (이전 후보 구조)
+
+> 주의: 이 문서는 행 단위 Gold·Silver·Unlabeled 후보를 만들었던 이전 구조를 설명한다. 현재 기준 원본 데이터셋 등급과 폴더 구조는 `project/data/model_datasets/README.md` 및 `dataset_tier_manifest.csv`를 따른다. 이전 후보 파일은 `project/data/model_datasets_candidate_legacy/`에 보관되어 있다.
 
 작성일: 2026-11-02  
 목적: 반려견 사료의 원료·영양성분·상품 정보를 입력으로 받아 건강 기능 카테고리를 예측하는 멀티라벨 분류 모델의 학습 데이터 구성을 정리한다.

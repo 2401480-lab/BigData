@@ -1,0 +1,82 @@
+﻿source,raw_label,standard_category,category_type,primary_training,mapping_note
+danawa|petsathome|purina_uk,소화기,digestive,건강기능,Y,공식 기능 라벨
+danawa,소화·장건강,digestive,건강기능,Y,공식 기능 라벨
+zooplus,Stomach & digestive care,digestive,건강기능,Y,공식 기능 라벨
+petsmart,Digestive Care,digestive,건강기능,Y,PetSmart curated 우선
+petsmart,Gastrointestinal,digestive,건강기능,Y,PetSmart curated 우선
+petsmart,Sensitive Stomach,digestive,건강기능,Y,PetSmart curated 우선
+danawa|petsathome|purina_uk,피부,skin_coat,건강기능,Y,공식 기능 라벨
+danawa,피부·피모·모질,skin_coat,건강기능,Y,공식 기능 라벨
+zooplus,"Hair-, fur- & skin care",skin_coat,건강기능,Y,쉼표로 분리 금지
+petsmart,Skin & Coat,skin_coat,건강기능,Y,PetSmart curated 우선
+petsmart,Sensitive Skin,skin_coat,건강기능,Y,PetSmart curated 우선
+petsmart,Shiny Coat,skin_coat,건강기능,Y,PetSmart curated 우선
+danawa|petsathome|purina_uk,체중,weight_management,건강기능,Y,공식 기능 라벨
+zooplus,Weight management,weight_management,건강기능,Y,공식 기능 라벨
+petsmart,Weight Control,weight_management,건강기능,Y,PetSmart curated 우선
+danawa|petsathome|purina_uk,관절,joint_bone,건강기능,Y,공식 기능 라벨
+zooplus,Joints & bone care,joint_bone,건강기능,Y,공식 기능 라벨
+petsmart,Hip & Joint,joint_bone,건강기능,Y,PetSmart curated 우선
+petsmart,Mobility,joint_bone,건강기능,Y,PetSmart curated 우선
+petsmart,Bone Development,joint_bone,건강기능,Y,PetSmart curated 우선
+danawa|petsathome|purina_uk,신장,renal,건강기능,Y,공식 기능 라벨
+zooplus,Renal care,renal,건강기능,Y,공식 기능 라벨
+danawa|petsathome|purina_uk,치아,dental_oral,건강기능,Y,공식 기능 라벨
+zooplus,Dental care & hygiene,dental_oral,건강기능,Y,공식 기능 라벨
+petsmart,Dental,dental_oral,건강기능,Y,PetSmart curated 우선
+danawa|petsathome|purina_uk,비뇨기,urinary,건강기능,Y,공식 기능 라벨
+zooplus,Urinary care,urinary,건강기능,Y,공식 기능 라벨
+zooplus,Immune system,immune,건강기능,N,희귀 라벨: 추가 수집 후 확대
+petsmart,Immune Support,immune,건강기능,N,희귀 라벨: 추가 수집 후 확대
+zooplus,Heart care,heart,건강기능,N,희귀 라벨: 추가 수집 후 확대
+petsmart,Cardiac,heart,건강기능,N,희귀 라벨: 추가 수집 후 확대
+zooplus,Liver care,liver,건강기능,N,희귀 라벨: 추가 수집 후 확대
+zooplus,Diabetic,diabetes,건강기능,N,희귀 라벨: 추가 수집 후 확대
+zooplus,Brain health,brain_health,건강기능,N,희귀 라벨: 추가 수집 후 확대
+petsmart,Brain Development,brain_health,건강기능,N,희귀 라벨: 추가 수집 후 확대
+zooplus,Hypoallergenic,hypoallergenic,식이특성,N,건강기능과 분리
+danawa|petsathome|purina_uk,저알러지,hypoallergenic,식이특성,N,건강기능과 분리
+zooplus,Sensitive,sensitive,식이특성,N,대상 기능 불명확
+zooplus,Sterilised,sterilised,대상특성,N,건강기능과 분리
+zooplus,Performance,performance,대상특성,N,건강기능과 분리
+petsmart,General Health,general_health,포괄태그,N,개별 기능의 음성 라벨로 사용 금지
+petsmart,Muscle Tone,muscle_tone,보조기능,N,추가 데이터 확보 후 확대
+petsmart,Active,active_lifestyle,대상특성,N,건강기능과 분리
+petsmart,Aging,aging,대상특성,N,시니어 태그와 구분
+petsmart,Vision,vision,건강기능,N,희귀 라벨
+petsmart,Eye Care,vision,건강기능,N,희귀 라벨
+petsmart,Allergies,hypoallergenic,식이특성,N,건강기능과 분리
+danawa,피부·모질개선,skin_coat,건강기능,Y,공식 기능 라벨
+danawa,관절·뼈건강,joint_bone,건강기능,Y,공식 기능 라벨
+danawa,체중관리,weight_management,건강기능,Y,공식 기능 라벨
+danawa,면역력강화,immune,건강기능,N,희귀 라벨: 추가 수집 후 확대
+danawa,눈건강·눈물,vision,건강기능,N,희귀 라벨: 추가 수집 후 확대
+danawa,치석예방·제거,dental_oral,건강기능,Y,공식 기능 라벨
+danawa,심장건강,heart,건강기능,N,희귀 라벨: 추가 수집 후 확대
+danawa,신장·요로건강,renal,건강기능,Y,복합 원문 라벨의 신장 기능
+danawa,신장·요로건강,urinary,건강기능,Y,복합 원문 라벨의 요로 기능
+danawa,임신·수유,reproduction_growth,대상특성,N,건강기능과 분리
+danawa,스트레스완화·심신안정,stress,건강기능,N,희귀 라벨: 추가 수집 후 확대
+danawa,간건강,liver,건강기능,N,희귀 라벨: 추가 수집 후 확대
+danawa,영양보충,nutrition_support,보조기능,N,추가 데이터 확보 후 확대
+danawa,중성화관리,sterilised,대상특성,N,건강기능과 분리
+danawa,알러지예방,hypoallergenic,식이특성,N,건강기능과 분리
+danawa,항산화효과,antioxidant_support,보조기능,N,추가 데이터 확보 후 확대
+petsathome|purina_uk,심장,heart,건강기능,N,희귀 라벨: 추가 수집 후 확대
+petsathome|purina_uk,회복,recovery,건강기능,N,희귀 라벨: 추가 수집 후 확대
+petsathome|purina_uk,당뇨,diabetes,건강기능,N,희귀 라벨: 추가 수집 후 확대
+petsathome|purina_uk,간,liver,건강기능,N,희귀 라벨: 추가 수집 후 확대
+petsathome|purina_uk,인지,brain_health,건강기능,N,희귀 라벨: 추가 수집 후 확대
+zooplus,Senility,aging,대상특성,N,시니어 태그와 구분
+zooplus,Stress,stress,건강기능,N,희귀 라벨: 추가 수집 후 확대
+zooplus,Appetite support,appetite_support,보조기능,N,희귀 라벨: 추가 수집 후 확대
+zooplus,Outdoor,outdoor_lifestyle,대상특성,N,건강기능과 분리
+zooplus,Vitamin deficiency,nutrition_support,보조기능,N,추가 데이터 확보 후 확대
+zooplus,Breeding & growth,reproduction_growth,대상특성,N,건강기능과 분리
+zooplus,Hormonal support,hormonal_support,건강기능,N,희귀 라벨: 추가 수집 후 확대
+zooplus,Reproduction & nursing,reproduction_growth,대상특성,N,건강기능과 분리
+zooplus,Cancer,cancer_support,건강기능,N,희귀 라벨: 추가 수집 후 확대
+zooplus,Pain relief,pain_relief,건강기능,N,희귀 라벨: 추가 수집 후 확대
+petsmart,Odor Control,odor_control,보조기능,N,추가 데이터 확보 후 확대
+petsmart,Appetite Stimulator,appetite_support,보조기능,N,추가 데이터 확보 후 확대
+petsmart,Weaning,reproduction_growth,대상특성,N,건강기능과 분리

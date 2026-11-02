@@ -1,0 +1,10 @@
+﻿file,rows,purpose
+gold/gold_candidates.csv,4711,공식 기능 라벨 및 PetSmart curated 라벨 후보
+gold/labels_gold.csv,8541,제1정규형 상품-표준카테고리 라벨 테이블
+gold/label_evidence_gold.csv,8580,원문 라벨과 표준 카테고리의 매핑 근거 테이블
+gold/labels_gold_unmapped.csv,0,사전에 없는 원문 라벨 검토 목록
+gold/labels_gold_summary.csv,8,라벨 정규화 검증 요약
+silver/silver_candidates.csv,261,PetSmart 텍스트 매핑 라벨; 보조 학습 전용
+unlabeled/unlabeled_candidates.csv,6336,기능 라벨 없이 모델 추론 대상
+unlabeled/openpetfoodfacts_scope_review.csv,15136,반려견 범위 판정 전 Open Pet Food Facts 원본 목록
+카테고리딕셔너리.csv,81,원문 기능 라벨과 표준 카테고리 매핑

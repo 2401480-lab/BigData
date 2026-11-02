@@ -1,0 +1,9 @@
+# Explicitly excluded project folders
+netflix/
+titanic/
+
+# Local environments, editor state, and setup logs
+.conda/
+.ipynb_checkpoints/
+.vscode/
+*.log

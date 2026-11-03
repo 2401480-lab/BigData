@@ -25,6 +25,7 @@ PROJECT = Path(__file__).resolve().parents[2]
 GOLD = PROJECT / "data/model_datasets/gold"
 PETSMART_SKU = PROJECT / "data/model_datasets/unlabeled/petsmart_dryfood_sku.csv"
 DANAWA_RAW = PROJECT / "data/Source/danawa_dogfood.csv"  # danawa_.csv에 없는 상품URL 복원용
+CATEGORY_DICT = PROJECT / "data/model_datasets/기능카테고리사전.csv"  # 기능_원문 → 표준 카테고리
 OUT = PROJECT / "data/model_datasets/unified"
 
 LB_TO_KG = 0.45359237
@@ -433,6 +434,34 @@ def range_flags(df):
     add_flag(df, dry_but_wet | wet_but_dry, "사료형태_수분불일치")
 
 
+def add_function_categories(df):
+    """기능_원문을 기능카테고리사전.csv로 표준 카테고리에 매핑한다.
+
+    기능카테고리: 건강기능(health_function) 카테고리 전체, 학습카테고리: 그중 학습채택=adopted만.
+    한 원문 라벨이 여러 카테고리에 대응할 수 있고(예: 신장·요로건강 → renal, urinary),
+    카테고리 표기 순서는 사전의 행 순서를 따른다. 사전에 없는 원문 라벨은 품질플래그로 표시한다.
+    """
+    dic = read(CATEGORY_DICT)
+    order = {c: i for i, c in enumerate(dict.fromkeys(dic["카테고리"]))}
+    health = dic[dic["유형"] == "health_function"]
+    to_categories = health.groupby(["출처", "원문라벨"])["카테고리"].agg(list).to_dict()
+    adopted = set(dic.loc[dic["학습채택"] == "adopted", "카테고리"])
+    known = set(zip(dic["출처"], dic["원문라벨"]))
+
+    def one(source, raw):
+        if pd.isna(raw):
+            return np.nan, np.nan, False
+        keys = [(source, label.strip()) for label in raw.split("|")]
+        found = sorted({c for k in keys for c in to_categories.get(k, [])}, key=order.get)
+        train = [c for c in found if c in adopted]
+        return "|".join(found) or np.nan, "|".join(train) or np.nan, any(k not in known for k in keys)
+
+    result = [one(s, r) for s, r in zip(df["출처"], df["기능_원문"])]
+    df["기능카테고리"] = [r[0] for r in result]
+    df["학습카테고리"] = [r[1] for r in result]
+    add_flag(df, pd.Series([r[2] for r in result], index=df.index), "기능라벨_사전없음")
+
+
 def apply_types(df):
     """스키마 타입에 맞춰 dtype을 정한다 (불리언 → True/False/NULL, 정수 → 결측 허용 정수, 실수 → 숫자)."""
     for a in SCHEMA:
@@ -445,6 +474,14 @@ def apply_types(df):
     return df
 
 
+GOLD_LABEL_SOURCES = ("사이트분류", "큐레이션")  # PetSmart 텍스트추출 라벨은 silver
+
+
+def select_gold(df):
+    """기능 라벨이 사이트 공식 분류 또는 PetSmart 큐레이션인 행만 남긴다 (training_dataset_summary.md의 Gold 기준)."""
+    return df[df["기능_원문"].notna() & df["라벨출처"].isin(GOLD_LABEL_SOURCES)].reset_index(drop=True)
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     df = pd.concat([load_danawa(), load_eu(GOLD / "zooplus_dog_food.csv", "zooplus"),
@@ -452,15 +489,20 @@ def main():
     dry_matter(df)
     fix_kcal(df)
     range_flags(df)
+    add_function_categories(df)
     df = apply_types(df[COLUMNS].copy())
-    validate_dataset(df, SCHEMA)
-    df.to_csv(OUT / "gold_unified.csv", index=False, encoding="utf-8-sig")
+    gold = select_gold(df)
+    for data in (df, gold):
+        validate_dataset(data, SCHEMA)
+    df.to_csv(OUT / "unified_all.csv", index=False, encoding="utf-8-sig")
+    gold.to_csv(OUT / "gold_unified.csv", index=False, encoding="utf-8-sig")
     write_dictionary(SCHEMA, OUT / "schema_dictionary.csv")
     log_df = pd.DataFrame(LOG)
     log_df.to_csv(OUT / "unit_conversion_log.csv", index=False, encoding="utf-8-sig")
 
-    print(f"통합: {df.shape[0]:,}행 × {df.shape[1]}열")
-    print(df["출처"].value_counts().to_string())
+    print(f"전체 통합: {df.shape[0]:,}행 × {df.shape[1]}열 → unified_all.csv")
+    print(f"Gold: {gold.shape[0]:,}행 × {gold.shape[1]}열 → gold_unified.csv")
+    print(pd.DataFrame({"전체": df["출처"].value_counts(), "gold": gold["출처"].value_counts()}).to_string())
     print("\n[환산 로그] 속성·규칙별 건수")
     print(log_df.groupby(["속성", "규칙"]).size().to_string())
     print("\n[품질플래그] 상위")

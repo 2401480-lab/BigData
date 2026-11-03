@@ -1,0 +1,99 @@
+﻿출처,원문라벨,카테고리,카테고리명,유형,학습채택,비고
+danawa,소화·장건강,digestive,소화·장 건강,health_function,adopted,
+petsathome,소화기,digestive,소화·장 건강,health_function,adopted,
+petsmart,Digestive Care,digestive,소화·장 건강,health_function,adopted,
+petsmart,Gastrointestinal,digestive,소화·장 건강,health_function,adopted,
+petsmart,Sensitive Stomach,digestive,소화·장 건강,health_function,adopted,
+purina_uk,소화기,digestive,소화·장 건강,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Stomach & digestive care,digestive,소화·장 건강,health_function,adopted,
+danawa,피부·모질개선,skin_coat,피부·모질,health_function,adopted,
+petsathome,피부,skin_coat,피부·모질,health_function,adopted,
+petsmart,Sensitive Skin,skin_coat,피부·모질,health_function,adopted,
+petsmart,Shiny Coat,skin_coat,피부·모질,health_function,adopted,
+petsmart,Skin & Coat,skin_coat,피부·모질,health_function,adopted,
+purina_uk,피부,skin_coat,피부·모질,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,"Hair-, fur- & skin care",skin_coat,피부·모질,health_function,adopted,원문 안의 쉼표는 구분자가 아니므로 분리하지 않음
+danawa,관절·뼈건강,joint_bone,관절·뼈,health_function,adopted,
+petsathome,관절,joint_bone,관절·뼈,health_function,adopted,
+petsmart,Bone Development,joint_bone,관절·뼈,health_function,adopted,
+petsmart,Hip & Joint,joint_bone,관절·뼈,health_function,adopted,
+petsmart,Mobility,joint_bone,관절·뼈,health_function,adopted,
+purina_uk,관절,joint_bone,관절·뼈,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Joints & bone care,joint_bone,관절·뼈,health_function,adopted,
+danawa,체중관리,weight_management,체중 관리,health_function,adopted,
+petsathome,체중,weight_management,체중 관리,health_function,adopted,
+petsmart,Weight Control,weight_management,체중 관리,health_function,adopted,
+purina_uk,체중,weight_management,체중 관리,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Weight management,weight_management,체중 관리,health_function,adopted,
+danawa,면역력강화,immune,면역,health_function,adopted,
+petsmart,Immune Support,immune,면역,health_function,adopted,
+zooplus,Immune system,immune,면역,health_function,adopted,
+danawa,치석예방·제거,dental_oral,치아·구강,health_function,adopted,
+petsathome,치아,dental_oral,치아·구강,health_function,adopted,
+petsmart,Dental,dental_oral,치아·구강,health_function,adopted,
+purina_uk,치아,dental_oral,치아·구강,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Dental care & hygiene,dental_oral,치아·구강,health_function,adopted,
+danawa,눈건강·눈물,vision,눈 건강,health_function,adopted,
+petsmart,Eye Care,vision,눈 건강,health_function,adopted,
+petsmart,Eye Health,vision,눈 건강,health_function,adopted,"PetSmart 텍스트추출(silver) 라벨, 2026-11-03 추가"
+petsmart,Vision,vision,눈 건강,health_function,adopted,
+danawa,심장건강,heart,심장,health_function,adopted,
+petsathome,심장,heart,심장,health_function,adopted,
+petsmart,Cardiac,heart,심장,health_function,adopted,
+petsmart,Heart Health,heart,심장,health_function,adopted,"PetSmart 텍스트추출(silver) 라벨, 2026-11-03 추가"
+purina_uk,심장,heart,심장,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Heart care,heart,심장,health_function,adopted,
+danawa,신장·요로건강,renal,신장,health_function,adopted,한 원문 라벨이 renal·urinary 두 카테고리에 매핑됨
+petsathome,신장,renal,신장,health_function,adopted,
+purina_uk,신장,renal,신장,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Renal care,renal,신장,health_function,adopted,
+danawa,신장·요로건강,urinary,비뇨·요로,health_function,adopted,한 원문 라벨이 renal·urinary 두 카테고리에 매핑됨
+petsathome,비뇨기,urinary,비뇨·요로,health_function,adopted,
+purina_uk,비뇨기,urinary,비뇨·요로,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Urinary care,urinary,비뇨·요로,health_function,adopted,
+petsathome,인지,brain_health,뇌·인지,health_function,held,
+petsmart,Brain Development,brain_health,뇌·인지,health_function,held,
+petsmart,Brain Health,brain_health,뇌·인지,health_function,held,"PetSmart 텍스트추출(silver) 라벨, 2026-11-03 추가"
+purina_uk,인지,brain_health,뇌·인지,health_function,held,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Brain health,brain_health,뇌·인지,health_function,held,
+zooplus,Cancer,cancer_support,암 관리,health_function,held,
+petsathome,당뇨,diabetes,당뇨 관리,health_function,held,
+purina_uk,당뇨,diabetes,당뇨 관리,health_function,held,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Diabetic,diabetes,당뇨 관리,health_function,held,
+zooplus,Hormonal support,hormonal_support,호르몬 지원,health_function,held,
+danawa,간건강,liver,간,health_function,held,
+petsathome,간,liver,간,health_function,held,
+purina_uk,간,liver,간,health_function,held,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Liver care,liver,간,health_function,held,
+zooplus,Pain relief,pain_relief,통증 완화,health_function,held,
+petsathome,회복,recovery,회복,health_function,held,
+purina_uk,회복,recovery,회복,health_function,held,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+danawa,스트레스완화·심신안정,stress,스트레스 완화,health_function,held,
+zooplus,Stress,stress,스트레스 완화,health_function,held,
+petsmart,Active,active_lifestyle,활동적 생활,target_trait,excluded,
+petsmart,Energy,active_lifestyle,활동적 생활,target_trait,excluded,"PetSmart 텍스트추출(silver) 라벨, 2026-11-03 추가"
+petsmart,Aging,aging,노령,target_trait,excluded,생애주기(시니어)와 구분되는 노령 관리 태그
+zooplus,Senility,aging,노령,target_trait,excluded,생애주기(시니어)와 구분되는 노령 관리 태그
+danawa,항산화효과,antioxidant_support,항산화,support_function,excluded,
+petsmart,Appetite Stimulator,appetite_support,식욕 지원,support_function,excluded,
+zooplus,Appetite support,appetite_support,식욕 지원,support_function,excluded,
+petsmart,General Health,general_health,전반적 건강,umbrella_tag,excluded,포괄 태그이므로 개별 기능이 없다는 뜻(음성)으로 쓰지 않음
+danawa,알러지예방,hypoallergenic,저알러지,diet_trait,excluded,
+petsathome,저알러지,hypoallergenic,저알러지,diet_trait,excluded,
+petsmart,Allergies,hypoallergenic,저알러지,diet_trait,excluded,
+petsmart,Allergy,hypoallergenic,저알러지,diet_trait,excluded,"PetSmart 텍스트추출(silver) 라벨, 2026-11-03 추가"
+purina_uk,저알러지,hypoallergenic,저알러지,diet_trait,excluded,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Hypoallergenic,hypoallergenic,저알러지,diet_trait,excluded,
+petsmart,Muscle Tone,muscle_tone,근육 유지,support_function,excluded,
+danawa,영양보충,nutrition_support,영양 보충,support_function,excluded,
+zooplus,Vitamin deficiency,nutrition_support,영양 보충,support_function,excluded,
+petsmart,Odor Control,odor_control,냄새 관리,support_function,excluded,
+zooplus,Outdoor,outdoor_lifestyle,야외 활동,target_trait,excluded,
+zooplus,Performance,performance,고활동,target_trait,excluded,
+danawa,임신·수유,reproduction_growth,번식·성장,target_trait,excluded,
+petsmart,Weaning,reproduction_growth,번식·성장,target_trait,excluded,
+zooplus,Breeding & growth,reproduction_growth,번식·성장,target_trait,excluded,
+zooplus,Reproduction & nursing,reproduction_growth,번식·성장,target_trait,excluded,
+zooplus,Sensitive,sensitive,민감성,diet_trait,excluded,어느 기능을 위한 민감성인지 불명확해 건강기능과 분리
+danawa,중성화관리,sterilised,중성화,target_trait,excluded,
+zooplus,Sterilised,sterilised,중성화,target_trait,excluded,

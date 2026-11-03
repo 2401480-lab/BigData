@@ -16,7 +16,7 @@
 | Silver | `data/model_datasets/silver/silver_candidates.csv` | 261 | PetSmart 설명 텍스트에서 추출된 보조 학습 후보 |
 | Unlabeled | `data/model_datasets/unlabeled/unlabeled_candidates.csv` | 6,336 | 기능 라벨이 없어 모델 완성 후 예측할 후보 |
 | 범위 검토 | `data/model_datasets/unlabeled/openpetfoodfacts_scope_review.csv` | 15,136 | 반려견 식품 여부 판정 전의 Open Pet Food Facts 목록 |
-| 카테고리 사전 | `data/model_datasets/카테고리딕셔너리.csv` | 81 | 원문 기능 라벨과 표준 카테고리의 매핑 규칙 |
+| 카테고리 사전 | `data/model_datasets/기능카테고리사전.csv` | 98 | 원문 기능 라벨과 표준 카테고리의 매핑, 학습 채택 여부 (기존 `카테고리딕셔너리.csv` 대체) |
 | 매니페스트 | `data/model_datasets/dataset_manifest.csv` | 5 | 생성 파일의 행 수와 용도 |
 
 원본 CSV는 변경·이동·삭제하지 않았다. 위 파일들은 학습 준비를 위한 역할별 복사본 또는 파생 후보 목록이다.
@@ -70,6 +70,8 @@ Unlabeled 6,336건은 기능 라벨이 비어 있어 학습 정답으로 사용�
 - Open Pet Food Facts는 15,136건 전체를 별도 범위 검토 파일로 두었다. 반려견 식품 판정 규칙을 적용한 뒤에만 추론 대상으로 편입한다.
 
 ## 표준 카테고리
+
+> **2026-11-03 갱신:** 학습 카테고리 선정은 [기능 카테고리 선정 기준](function_category_criteria.md)으로 대체되었다. 모비율 신뢰구간 기준(95%, ±10%p, 5-fold 교차검증 → 최소 97건)으로 10개 카테고리를 채택했고, 매핑 사전은 `기능카테고리사전.csv`로 바뀌었다. 아래 내용은 이전 기준(`primary_training=Y`, 7개)의 기록이다.
 
 ### 1차 학습에 사용하는 건강 기능 카테고리
 
@@ -126,7 +128,7 @@ Unlabeled 6,336건은 기능 라벨이 비어 있어 학습 정답으로 사용�
 
 ## 다음 단계
 
-1. Gold 파일의 `label_raw`를 `카테고리딕셔너리.csv`로 매핑한다.
+1. ~~Gold 파일의 `label_raw`를 카테고리 사전으로 매핑한다.~~ 완료: `기능카테고리사전.csv`로 매핑해 통합 데이터의 `기능카테고리`·`학습카테고리`에 반영 (2026-11-03).
 2. 상품-표준카테고리 한 행 구조의 `labels.csv`를 만든다.
 3. Gold 중 카테고리별 무작위 표본을 사람 검수해 테스트용 Gold셋을 확정한다.
 4. `group_id` 단위로 학습·검증·테스트를 분할한다.

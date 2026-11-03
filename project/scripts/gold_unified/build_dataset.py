@@ -1,14 +1,17 @@
-"""gold 폴더의 출처별 원본 4개(다나와·Zooplus·Pets at Home·PetSmart)를 한글 통합 스키마로 변환한다.
+"""gold 폴더의 출처별 원본 4개(다나와·Zooplus·Pets at Home·PetSmart)를 통합 스키마에 맞춰 하나로 합친다.
+
+스키마는 schema.py가 project/md/gold_unified_schema.md의 '10. 스키마 정의' 표에서 읽는다.
+이 파일은 원본 컬럼을 스키마 속성에 채우는 변환 규칙만 갖고, 저장 전에 결과가 스키마와 맞는지 검사한다.
 
 산출물 (data/model_datasets/unified/):
   - gold_unified.csv          통합 데이터 (한 행 = 상품 1개)
-  - schema_dictionary.csv     속성 사전 (속성별 단위, 출처별 원본 컬럼, 병합 유형, 환산 규칙)
+  - schema_dictionary.csv     스키마 표의 자동 생성 사본 (schema.py)
   - unit_conversion_log.csv   값이 바뀌거나 무효 처리된 환산 내역 (행 단위)
 
 원칙: 원본 파일은 수정하지 않는다. 환산은 근거 규칙을 로그로 남기고, 근거 없이 고칠 수 없는 값은
 삭제하지 않고 NULL + 품질플래그로 표시한다 (project/md/data_integration_rules.md).
 
-실행: python project/scripts/build_gold_unified.py
+실행: python project/scripts/gold_unified/build_dataset.py
 """
 import re
 from pathlib import Path
@@ -16,7 +19,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-PROJECT = Path(__file__).resolve().parents[1]
+from schema import load_schema, validate_dataset, write_dictionary
+
+PROJECT = Path(__file__).resolve().parents[2]
 GOLD = PROJECT / "data/model_datasets/gold"
 PETSMART_SKU = PROJECT / "data/model_datasets/unlabeled/petsmart_dryfood_sku.csv"
 DANAWA_RAW = PROJECT / "data/Source/danawa_dogfood.csv"  # danawa_.csv에 없는 상품URL 복원용
@@ -28,55 +33,11 @@ G_PER_LB = 453.59237
 KJ_PER_KCAL = 4.184
 PCT_TO_MG_KG = 10_000  # 1% = 10 g/kg = 10,000 mg/kg
 
-# ---------------------------------------------------------------------------
-# 통합 스키마 정의: (속성명, 그룹, 타입, 단위, 설명, {출처: 원본 컬럼}, 환산 규칙)
-# 병합 유형은 원본 컬럼이 있는 출처 수로 자동 판정한다.
-# ---------------------------------------------------------------------------
-SOURCES = ["danawa", "zooplus", "petsathome", "petsmart"]
-SCHEMA = [
-    ("출처", "식별", "문자열", "", "데이터 출처 코드", {s: "(파일 단위로 부여)" for s in SOURCES}, ""),
-    ("사이트", "식별", "문자열", "", "판매 사이트 국가 구분", {"zooplus": "site", "petsathome": "site"}, ""),
-    ("상품ID", "식별", "문자열", "", "출처 내 상품 식별자 (출처+상품ID가 통합 키)",
-     {"danawa": "pcode", "zooplus": "product_id", "petsathome": "product_id", "petsmart": "web_style_id"}, ""),
-    ("상품명", "식별", "문자열", "", "사이트에 표시된 상품명 원문",
-     {"danawa": "상품명", "zooplus": "name", "petsathome": "name", "petsmart": "name"}, ""),
-    ("브랜드", "식별", "문자열", "", "사료 브랜드",
-     {"zooplus": "brand", "petsathome": "brand", "petsmart": "brand"}, ""),
-    ("제조사", "식별", "문자열", "", "제조·수입사 (브랜드와 다름)", {"danawa": "제조사"}, ""),
-    ("상품URL", "식별", "문자열", "", "상품 상세 페이지 URL",
-     {"danawa": "Source/danawa_dogfood.csv 상품URL (pcode로 결합)", "zooplus": "url", "petsathome": "url",
-      "petsmart": "petsmart_dryfood_sku.csv url (첫 SKU)"}, ""),
-    ("사료형태", "분류", "범주(복수)", "", "표준 코드: 건식·습식·반건조·동결건조·에어드라이·화식·냉동·토퍼·간식·액상·분말",
-     {"danawa": "제형", "zooplus": "category + 사료형태", "petsathome": "category + food_format", "petsmart": "food_type"}, ""),
-    ("사료형태_원문", "분류", "문자열", "", "표준화 전 사료형태 원문",
-     {"danawa": "제형", "zooplus": "사료형태", "petsathome": "food_format", "petsmart": "food_type"}, ""),
-    ("가공방식", "분류", "문자열", "", "동결건조·화식·에어드라이 등 가공 방식", {"danawa": "가공방식"}, ""),
-    ("사료여부", "분류", "불리언", "", "주식 사료 여부 (False = 액상·분말 보조식 등)", {"danawa": "사료여부"}, ""),
-    ("생애주기", "분류", "범주(복수)", "", "표준 코드: 퍼피·어덜트·시니어·전연령",
-     {"danawa": "나이", "zooplus": "생애주기", "petsathome": "생애주기", "petsmart": "life_stage (없으면 life_stages)"}, ""),
-    ("생애주기_원문", "분류", "문자열", "", "표준화 전 생애주기 원문",
-     {"danawa": "나이", "zooplus": "생애주기", "petsathome": "생애주기", "petsmart": "life_stage"}, ""),
-    ("견종크기", "분류", "범주(복수)", "", "표준 코드: 초소형·소형·중형·대형·초대형·전체",
-     {"zooplus": "견종크기", "petsathome": "견종크기", "petsmart": "breed_size"}, ""),
-    ("견종크기_원문", "분류", "문자열", "", "표준화 전 견종크기 원문",
-     {"zooplus": "견종크기", "petsathome": "견종크기", "petsmart": "breed_size"}, ""),
-    ("알갱이크기", "분류", "문자열", "", "사료 알갱이(키블) 크기", {"danawa": "크기", "petsmart": "kibble_sizes"}, ""),
-    ("기능_원문", "라벨", "문자열(복수)", "", "출처의 건강 기능 라벨 원문 (카테고리딕셔너리로 표준화 예정)",
-     {"danawa": "기능", "zooplus": "기능", "petsathome": "기능", "petsmart": "hc_final"}, ""),
-    ("라벨출처", "라벨", "범주", "", "기능 라벨의 근거: 사이트분류 / 큐레이션 / 텍스트추출",
-     {"danawa": "(고정: 사이트분류)", "zooplus": "(고정: 사이트분류)", "petsathome": "(고정: 사이트분류)", "petsmart": "hc_source"}, ""),
-    ("처방식여부", "분류", "불리언", "", "처방식 표시 여부", {"danawa": "처방식여부", "petsathome": "처방식"}, ""),
-    ("맛", "분류", "문자열(복수)", "", "맛·주요 풍미", {"zooplus": "맛", "petsathome": "맛", "petsmart": "flavor"}, ""),
-    ("포장", "분류", "문자열", "", "포장 형태", {"danawa": "포장", "zooplus": "포장", "petsathome": "포장"}, ""),
-    ("인증", "분류", "문자열(복수)", "", "AAFCO·HACCP 등 인증 표시", {"danawa": "인증"}, ""),
-    ("표시태그", "분류", "문자열(복수)", "", "무방부제·그레인프리 등 상품 표시 태그 (값이 1인 플래그만 나열)",
-     {"danawa": "무방부제여부·무합성보존제여부·GMOFree여부·가수분해여부·그레인프리여부·무색소여부"}, ""),
-    ("원재료", "원료", "문자열", "", "원재료 원문",
-     {"zooplus": "ingredients", "petsathome": "ingredients", "petsmart": "ingredients"}, ""),
-    ("주단백질원", "원료", "문자열(복수)", "", "주 단백질원 요약", {"danawa": "주 단백질원"}, ""),
-    ("주요기능성분", "원료", "문자열(복수)", "", "L-카르니틴 등 강조 성분", {"danawa": "주요성분"}, ""),
-]
-NUTRIENT_PCT = [  # (표준명, 다나와/zooplus/pah 컬럼, petsmart 컬럼)
+# 통합 스키마(속성명·순서·타입)는 schema.py가 md 표에서 읽는다. 여기서는 정의하지 않는다.
+SCHEMA = load_schema()
+COLUMNS = [a.name for a in SCHEMA]
+
+NUTRIENT_PCT = [  # 변환 코드용 영양소 원본 컬럼 대응: (표준명, 다나와/zooplus/pah 컬럼, petsmart 컬럼)
     ("조단백", "조단백", "crude_protein"),
     ("조지방", "조지방", "crude_fat"),
     ("조섬유", "조섬유", "crude_fiber"),
@@ -86,86 +47,6 @@ NUTRIENT_PCT = [  # (표준명, 다나와/zooplus/pah 컬럼, petsmart 컬럼)
     ("인", "인", "phosphorus"),
     ("나트륨", "나트륨", "sodium"),
 ]
-for name, kr, en in NUTRIENT_PCT:
-    cols = {"danawa": kr, "zooplus": kr, "petsathome": kr, "petsmart": en}
-    if name == "나트륨":
-        cols = {"zooplus": kr, "petsathome": kr}
-    rule = "petsmart: 단위 없는 행은 %로 간주(로그)" if "petsmart" in cols else ""
-    SCHEMA.append((f"{name}_pct", "영양(현물)", "실수", "%", f"{name} 함량, 현물(as-fed) 기준", cols, rule))
-SCHEMA.append(("영양표기기준", "영양(현물)", "문자열", "", "보증성분의 하한/상한 표기 (예: 조단백:하한|조섬유:상한)",
-               {"petsmart": "*_minmax"}, "min→하한, max→상한"))
-for name, kr, _ in NUTRIENT_PCT:
-    cols = {"danawa": f"건물기준_{kr}" if kr in ("조단백", "조지방") else "(재계산)",
-            "zooplus": f"dm_{kr}", "petsathome": f"dm_{kr}", "petsmart": "(재계산)"}
-    if name == "수분":
-        continue
-    SCHEMA.append((f"건물기준_{name}_pct", "영양(건물)", "실수", "%", f"{name} 함량, 건물(dry matter) 기준", cols,
-                   "현물값 ÷ (1 − 수분/100) 로 전 출처 재계산. 현물값이 없고 원본 건물기준만 있으면 원본값 사용"))
-SCHEMA += [
-    ("열량_kcal_kg", "열량", "실수", "kcal/kg", "대사에너지(ME), 현물 기준",
-     {"zooplus": "kcal_per_kg", "petsathome": "kcal_per_kg", "petsmart": "kcal_per_kg"},
-     "범위(500~6,000) 밖 값은 성분 추정 열량과 비교해 kcal/g·kcal/100g·kJ·소수점 밀림 중 맞는 배수로 보정, 불가하면 NULL"),
-    ("열량_원값", "열량", "실수", "원문 단위", "보정 전 원본 열량 값",
-     {"zooplus": "kcal_per_kg", "petsathome": "kcal_per_kg", "petsmart": "kcal_per_kg"}, ""),
-    ("타우린_pct", "미량성분", "실수", "%", "타우린", {"zooplus": "타우린", "petsmart": "taurine"},
-     "zooplus: 100 초과 값은 mg/kg로 보고 ÷10,000"),
-    ("오메가3_pct", "미량성분", "실수", "%", "오메가3 지방산",
-     {"zooplus": "오메가3", "petsathome": "오메가3", "petsmart": "omega3"}, ""),
-    ("오메가6_pct", "미량성분", "실수", "%", "오메가6 지방산",
-     {"zooplus": "오메가6", "petsathome": "오메가6", "petsmart": "omega6"}, "petsmart: IU/kg 표기 1건은 단위오류로 NULL"),
-    ("EPA_DHA합_pct", "미량성분", "실수", "%", "EPA+DHA 합계",
-     {"petsathome": "EPA_DHA", "petsmart": "epa + dha"}, "petsmart: EPA와 DHA가 모두 있을 때만 합산"),
-    ("리놀레산_pct", "미량성분", "실수", "%", "리놀레산", {"petsmart": "linoleic_acid"}, ""),
-    ("칼륨_pct", "미량성분", "실수", "%", "칼륨", {"zooplus": "칼륨", "petsathome": "칼륨"}, ""),
-    ("마그네슘_pct", "미량성분", "실수", "%", "마그네슘", {"zooplus": "마그네슘", "petsathome": "마그네슘"}, ""),
-    ("탄수화물_pct", "미량성분", "실수", "%", "탄수화물", {"zooplus": "탄수화물", "petsathome": "탄수화물"}, ""),
-    ("전분_pct", "미량성분", "실수", "%", "전분", {"zooplus": "전분"}, ""),
-    ("염소_pct", "미량성분", "실수", "%", "염소", {"zooplus": "염소"}, ""),
-    ("글루코사민_mg_kg", "미량성분", "실수", "mg/kg", "글루코사민", {"zooplus": "글루코사민", "petsmart": "glucosamine"},
-     "zooplus % ×10,000 / petsmart ppm=mg/kg / IU/kg는 단위오류로 NULL"),
-    ("콘드로이틴_mg_kg", "미량성분", "실수", "mg/kg", "콘드로이틴", {"petsmart": "chondroitin"}, "ppm=mg/kg"),
-    ("L카르니틴_mg_kg", "미량성분", "실수", "mg/kg", "L-카르니틴", {"zooplus": "카르니틴", "petsmart": "l_carnitine"},
-     "zooplus % ×10,000 / petsmart ppm=mg/kg"),
-    ("아연_mg_kg", "미량성분", "실수", "mg/kg", "아연", {"petsmart": "zinc"}, ""),
-    ("셀레늄_mg_kg", "미량성분", "실수", "mg/kg", "셀레늄", {"petsmart": "selenium"}, ""),
-    ("비타민C_mg_kg", "미량성분", "실수", "mg/kg", "비타민 C", {"petsmart": "vitamin_c"}, "ppm=mg/kg"),
-    ("비타민A_IU_kg", "미량성분", "실수", "IU/kg", "비타민 A", {"petsmart": "vitamin_a"}, "% 표기 1건은 단위오류로 NULL"),
-    ("비타민E_IU_kg", "미량성분", "실수", "IU/kg", "비타민 E", {"petsmart": "vitamin_e"},
-     "mg/kg 표기 1건은 형태(천연/합성)를 몰라 IU 환산 불가 → NULL"),
-    ("유산균_CFU_g", "미량성분", "실수", "CFU/g", "유산균 수", {"petsmart": "probiotics_cfu"},
-     "CFU/lb ÷ 453.59 → CFU/g, 단위 없는 행은 NULL"),
-    ("통화", "가격", "범주", "ISO 4217", "가격 통화",
-     {"danawa": "(고정: KRW)", "zooplus": "currency", "petsathome": "currency", "petsmart": "(고정: USD)"}, ""),
-    ("최저가", "가격", "실수", "통화", "옵션 중 최저 판매가 (다나와는 묶음상품이면 묶음 전체 가격)",
-     {"danawa": "최저가", "zooplus": "price_min", "petsathome": "price_min", "petsmart": "price_min"}, ""),
-    ("최고가", "가격", "실수", "통화", "옵션 중 최고 판매가",
-     {"zooplus": "price_max", "petsathome": "price_max", "petsmart": "price_max"}, ""),
-    ("kg당최저가", "가격", "실수", "통화/kg", "kg당 최저 가격",
-     {"danawa": "단위가격_원/kg", "zooplus": "price_per_kg_min", "petsathome": "price_per_kg_min",
-      "petsmart": "(계산) SKU 가격 ÷ SKU 중량"},
-     "다나와: 원문 원/10g ×100 (상류 단계에서 환산됨, 원/10ml 40건은 NULL) / petsmart: SKU별 lb·oz→kg 후 가격÷중량의 최솟값"),
-    ("중량_kg_최소", "가격", "실수", "kg", "판매 옵션 중 최소 총중량",
-     {"danawa": "중량_kg", "zooplus": "sizes", "petsathome": "sizes", "petsmart": "sizes"},
-     "g ÷1,000, lb ×0.4536, oz ×0.02835, 'N x 용량'은 곱해서 총중량, '+ 증정'은 합산"),
-    ("중량_kg_최대", "가격", "실수", "kg", "판매 옵션 중 최대 총중량",
-     {"danawa": "중량_kg", "zooplus": "sizes", "petsathome": "sizes", "petsmart": "sizes"}, "중량_kg_최소와 같음"),
-    ("판매옵션_원문", "가격", "문자열", "", "용량·옵션 원문",
-     {"zooplus": "sizes", "petsathome": "sizes", "petsmart": "sizes"}, ""),
-    ("평점", "리뷰", "실수", "5점 만점", "사이트 평점",
-     {"danawa": "평점", "zooplus": "rating", "petsathome": "rating", "petsmart": "rating"}, ""),
-    ("리뷰수", "리뷰", "정수", "건", "리뷰 수",
-     {"danawa": "리뷰수", "zooplus": "review_count", "petsathome": "review_count", "petsmart": "review_count"}, ""),
-    ("리뷰수_하한표기여부", "리뷰", "불리언", "", "True면 원문이 '999+' (실제 리뷰수는 그 이상)", {"danawa": "리뷰수_999이상"}, ""),
-    ("등록연도", "리뷰", "정수", "", "사이트 등록 연도", {"danawa": "등록연도"}, ""),
-    ("영양정보보유여부", "품질", "불리언", "", "영양성분 정보 보유 여부",
-     {"zooplus": "영양정보_있음", "petsathome": "영양정보_있음"}, ""),
-    ("중복여부", "품질", "불리언", "", "출처가 표시한 중복 여부 (zooplus: 사이트 내 중복, petsathome: zooplus에도 있음)",
-     {"zooplus": "is_dup", "petsathome": "in_zooplus"}, ""),
-    ("품질플래그", "품질", "문자열(복수)", "", "범위 검사·환산 결과 플래그 + 원본 이상값 표시(원본: 접두어)",
-     {"danawa": "(검사 결과)", "zooplus": "(검사 결과)", "petsathome": "(검사 결과) + 이상값", "petsmart": "(검사 결과)"},
-     "data_integration_rules.md 8.2 검토 범위 적용"),
-]
-COLUMNS = [s[0] for s in SCHEMA]
 
 # ---------------------------------------------------------------------------
 # 공통 도우미
@@ -552,16 +433,16 @@ def range_flags(df):
     add_flag(df, dry_but_wet | wet_but_dry, "사료형태_수분불일치")
 
 
-def write_dictionary(df):
-    rows = []
-    for name, group, typ, unit, desc, cols, rule in SCHEMA:
-        n = sum(s in cols for s in SOURCES)  # 고정값·재계산으로 채우는 출처도 포함
-        kind = ("파생" if name == "출처" else "전 출처 병합" if n == 4 else
-                "일부 출처 병합" if n >= 2 else "단일 출처")
-        rows.append({"속성명": name, "그룹": group, "타입": typ, "단위": unit, "설명": desc, "병합유형": kind,
-                     **{f"{s}_원본": cols.get(s, "") for s in SOURCES},
-                     "단위환산_규칙": rule, "채움률_%": round(df[name].notna().mean() * 100, 1)})
-    pd.DataFrame(rows).to_csv(OUT / "schema_dictionary.csv", index=False, encoding="utf-8-sig")
+def apply_types(df):
+    """스키마 타입에 맞춰 dtype을 정한다 (불리언 → True/False/NULL, 정수 → 결측 허용 정수, 실수 → 숫자)."""
+    for a in SCHEMA:
+        if a.type == "불리언":
+            df[a.name] = df[a.name].astype("boolean")
+        elif a.type == "정수":
+            df[a.name] = pd.to_numeric(df[a.name], errors="coerce").astype("Int64")
+        elif a.type == "실수":
+            df[a.name] = pd.to_numeric(df[a.name], errors="coerce")
+    return df
 
 
 def main():
@@ -571,11 +452,10 @@ def main():
     dry_matter(df)
     fix_kcal(df)
     range_flags(df)
-    df = df[COLUMNS]
-    for col in ["처방식여부", "사료여부", "리뷰수_하한표기여부", "영양정보보유여부", "중복여부"]:
-        df[col] = df[col].astype("boolean")
+    df = apply_types(df[COLUMNS].copy())
+    validate_dataset(df, SCHEMA)
     df.to_csv(OUT / "gold_unified.csv", index=False, encoding="utf-8-sig")
-    write_dictionary(df)
+    write_dictionary(SCHEMA, OUT / "schema_dictionary.csv")
     log_df = pd.DataFrame(LOG)
     log_df.to_csv(OUT / "unit_conversion_log.csv", index=False, encoding="utf-8-sig")
 

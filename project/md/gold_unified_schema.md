@@ -13,6 +13,7 @@
 | 산출물 | 경로 | 내용 |
 | --- | --- | --- |
 | **Gold 통합 데이터** | `data/model_datasets/unified/gold_unified.csv` | 4,669행 × 81열. 아래 Gold 기준을 통과한 상품만 |
+| **Gold 학습 라벨 (장형)** | `data/model_datasets/unified/gold_labels_long.csv` | 6,188행 × 3열 (`출처`, `상품ID`, `학습카테고리`). `학습카테고리`의 `\|` 복수값을 상품-카테고리 1쌍 = 1행으로 펼친 제1정규형. 키는 세 열 전체이고, `출처 + 상품ID`로 `gold_unified.csv`와 조인한다. 학습카테고리가 없는 상품 1,316개는 행이 없다. 카테고리 이름은 `기능카테고리사전.csv`를 조인한다 |
 | 전체 통합 데이터 | `data/model_datasets/unified/unified_all.csv` | 8,454행 × 81열. 라벨 유무와 무관하게 원본 4개 전체 |
 | 속성 사전 | `data/model_datasets/unified/schema_dictionary.csv` | 10절 표의 자동 생성 사본 + 병합유형 (직접 수정하지 않음) |
 | 환산 로그 | `data/model_datasets/unified/unit_conversion_log.csv` | 값이 바뀌거나 NULL 처리된 2,025건의 원값·변환값·규칙 |
@@ -264,14 +265,14 @@ PetSmart `*_minmax`(`min`, `max`)는 `영양표기기준` 속성에 `조단백:�
 # 스키마만 검사하고 schema_dictionary.csv 생성 (10절 표를 고친 뒤 형식 확인용)
 python project/scripts/gold_unified/schema.py
 
-# 통합 데이터 생성 (스키마 검사 포함, 산출물 4개 재생성)
+# 통합 데이터 생성 (스키마 검사 포함, 산출물 5개 재생성)
 python project/scripts/gold_unified/build_dataset.py
 ```
 
 | 스크립트 | 역할 |
 | --- | --- |
 | `schema.py` | 10절 표를 읽어 형식(열 구성, 타입 이름, 속성명 중복)을 검사하고 스키마 객체를 만든다. 병합유형은 출처별 원본 칸이 채워진 수로 계산한다. |
-| `build_dataset.py` | `schema.py`의 스키마로 원본 4개를 변환·통합해 `unified_all.csv`를 만들고, Gold 기준으로 걸러 `gold_unified.csv`를 만든다. 저장 전에 두 파일 모두 컬럼의 이름·순서·타입이 스키마와 일치하는지 검사한다. |
+| `build_dataset.py` | `schema.py`의 스키마로 원본 4개를 변환·통합해 `unified_all.csv`를 만들고, Gold 기준으로 걸러 `gold_unified.csv`를 만들고, 그 `학습카테고리`를 장형으로 펼쳐 `gold_labels_long.csv`를 만든다. 저장 전에 두 파일 모두 컬럼의 이름·순서·타입이 스키마와 일치하는지 검사한다. |
 
 새 속성을 추가하려면 10절 표에 행을 추가하고, `build_dataset.py`의 해당 출처 로더(`load_danawa`, `load_eu`, `load_petsmart`)에 값을 채우는 코드를 넣는다. 표에만 추가하고 코드를 넣지 않으면 그 속성은 전부 NULL로 생성된다.
 

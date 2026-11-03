@@ -520,6 +520,20 @@ def select_gold(df):
     return df[df["기능_원문"].notna() & df["라벨출처"].isin(GOLD_LABEL_SOURCES)].reset_index(drop=True)
 
 
+def long_labels(gold):
+    """학습카테고리를 상품-카테고리 1쌍 = 1행의 장형으로 펼친다 (제1정규형, 키: 출처 + 상품ID + 학습카테고리).
+
+    카테고리 이름 등 카테고리 속성은 기능카테고리사전.csv에 있으므로 넣지 않는다.
+    학습카테고리가 없는 상품은 행이 생기지 않는다.
+    """
+    long = (gold[["출처", "상품ID", "학습카테고리"]].dropna(subset=["학습카테고리"])
+            .assign(학습카테고리=lambda t: t["학습카테고리"].str.split("|"))
+            .explode("학습카테고리", ignore_index=True))
+    if long.duplicated().any():
+        raise ValueError("학습카테고리 장형에 중복 행이 있다")
+    return long
+
+
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     df = pd.concat([load_danawa(), load_eu(GOLD / "zooplus_dog_food.csv", "zooplus"),
@@ -534,12 +548,16 @@ def main():
         validate_dataset(data, SCHEMA)
     df.to_csv(OUT / "unified_all.csv", index=False, encoding="utf-8-sig")
     gold.to_csv(OUT / "gold_unified.csv", index=False, encoding="utf-8-sig")
+    labels = long_labels(gold)
+    labels.to_csv(OUT / "gold_labels_long.csv", index=False, encoding="utf-8-sig")
     write_dictionary(SCHEMA, OUT / "schema_dictionary.csv")
     log_df = pd.DataFrame(LOG)
     log_df.to_csv(OUT / "unit_conversion_log.csv", index=False, encoding="utf-8-sig")
 
     print(f"전체 통합: {df.shape[0]:,}행 × {df.shape[1]}열 → unified_all.csv")
     print(f"Gold: {gold.shape[0]:,}행 × {gold.shape[1]}열 → gold_unified.csv")
+    print(f"Gold 학습카테고리 장형: {len(labels):,}행 (상품 {labels[['출처', '상품ID']].drop_duplicates().shape[0]:,}개) "
+          f"→ gold_labels_long.csv")
     print(pd.DataFrame({"전체": df["출처"].value_counts(), "gold": gold["출처"].value_counts()}).to_string())
     print(f"\n[건식 수분 추정] {df['수분추정여부'].sum():,}행 (gold {gold['수분추정여부'].sum():,}행), "
           f"하위 형태별 추정 수분(%): {moisture_medians.to_dict()}")

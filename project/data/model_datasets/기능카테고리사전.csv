@@ -43,14 +43,13 @@ petsmart,Cardiac,heart,심장,health_function,adopted,
 petsmart,Heart Health,heart,심장,health_function,adopted,"PetSmart 텍스트추출(silver) 라벨, 2026-11-03 추가"
 purina_uk,심장,heart,심장,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
 zooplus,Heart care,heart,심장,health_function,adopted,
-danawa,신장·요로건강,renal,신장,health_function,adopted,한 원문 라벨이 renal·urinary 두 카테고리에 매핑됨
-petsathome,신장,renal,신장,health_function,adopted,
-purina_uk,신장,renal,신장,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
-zooplus,Renal care,renal,신장,health_function,adopted,
-danawa,신장·요로건강,urinary,비뇨·요로,health_function,adopted,한 원문 라벨이 renal·urinary 두 카테고리에 매핑됨
-petsathome,비뇨기,urinary,비뇨·요로,health_function,adopted,
-purina_uk,비뇨기,urinary,비뇨·요로,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
-zooplus,Urinary care,urinary,비뇨·요로,health_function,adopted,
+danawa,신장·요로건강,renal_urinary,신장·요로,health_function,adopted,원문이 신장과 요로를 구분하지 않아 renal·urinary를 하나로 통합
+petsathome,신장,renal_urinary,신장·요로,health_function,adopted,
+purina_uk,신장,renal_urinary,신장·요로,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Renal care,renal_urinary,신장·요로,health_function,adopted,
+petsathome,비뇨기,renal_urinary,신장·요로,health_function,adopted,
+purina_uk,비뇨기,renal_urinary,신장·요로,health_function,adopted,Purina UK: 현재 통합 데이터에 없는 출처 (이후 통합용)
+zooplus,Urinary care,renal_urinary,신장·요로,health_function,adopted,
 petsathome,인지,brain_health,뇌·인지,health_function,held,
 petsmart,Brain Development,brain_health,뇌·인지,health_function,held,
 petsmart,Brain Health,brain_health,뇌·인지,health_function,held,"PetSmart 텍스트추출(silver) 라벨, 2026-11-03 추가"

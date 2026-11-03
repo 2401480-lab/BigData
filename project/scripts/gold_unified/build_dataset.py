@@ -407,16 +407,54 @@ def fix_kcal(df):
     df["열량_kcal_kg"] = result
 
 
+DRY_SUBTYPES = ["동결건조", "에어드라이", "탈수건조"]  # 수분 추정용 하위 형태 (이 순서로 판정, 없으면 일반 건식)
+
+
+def form_group(value):
+    """사료형태 복수값을 건식·습식·반건조·미상으로 묶는다 (그룹별 수분 중앙값: 건식 5~18%, 반건조 25%, 습식 72~95%)."""
+    if pd.isna(value):
+        return "미상"
+    codes = set(value.split("|"))
+    if codes & {"습식", "화식", "냉동"}:
+        return "습식"
+    if "반건조" in codes and "건식" not in codes:
+        return "반건조"
+    if codes & {"건식", *DRY_SUBTYPES}:
+        return "건식"
+    return "습식" if "토퍼" in codes else "미상"
+
+
+def dry_subtype(value):
+    codes = set(str(value).split("|"))
+    return next((s for s in DRY_SUBTYPES if s in codes), "건식")
+
+
 def dry_matter(df):
-    moist = df["수분_pct"]
-    valid = moist.notna() & (moist < 100)
+    """건물기준 = 현물값 ÷ (1 − 수분/100). 수분이 없는 건식은 하위 형태별 실측 수분 중앙값으로 추정한다.
+
+    건식 수분은 중앙값 10%, 사분위 10~12%로 좁고 건강기능 카테고리별 차이가 없어(EDA 4-4절) 추정 오차가 작다.
+    습식은 수분 범위가 넓어 추정하지 않는다. 추정 수분은 수분_pct에도 채우고, 추정 여부는 수분추정여부로 표시한다
+    (실측값만 쓰려면 수분추정여부=False인 행만 쓴다). 돌려주는 값은 하위 형태별 추정 수분(중앙값)이다.
+    """
+    df["형태대분류"] = df["사료형태"].map(form_group)
+    dry = df["형태대분류"].eq("건식")
+    subtype = df["사료형태"].map(dry_subtype).where(dry)
+    measured = df["수분_pct"].where(df["수분_pct"] < 100)
+    medians = measured[dry].groupby(subtype[dry]).median()
+    raw_cols = [f"{name}_pct" for name, _, _ in NUTRIENT_PCT if name != "수분"]
+    impute = dry & df["수분_pct"].isna() & df[raw_cols].notna().any(axis=1)
+    estimate = subtype.map(medians).where(impute)
+    moist = measured.fillna(estimate)
+    df["수분_pct"] = df["수분_pct"].fillna(estimate)
+    df["수분추정여부"] = impute
     for name, _, _ in NUTRIENT_PCT:
         if name == "수분":
             continue
         col = f"건물기준_{name}_pct"
         source_dm = pd.to_numeric(df[col], errors="coerce")  # 원본 제공값 (재계산값과 일치 확인됨)
-        calc = (df[f"{name}_pct"] / (1 - moist / 100)).where(valid).round(2)
+        calc = (df[f"{name}_pct"] / (1 - moist / 100)).round(2)
         df[col] = calc.fillna(source_dm)
+    return medians
 
 
 RANGE_CHECKS = [("조단백_pct", 70), ("조지방_pct", 50), ("조섬유_pct", 20), ("조회분_pct", 20), ("수분_pct", 95),
@@ -486,7 +524,7 @@ def main():
     OUT.mkdir(parents=True, exist_ok=True)
     df = pd.concat([load_danawa(), load_eu(GOLD / "zooplus_dog_food.csv", "zooplus"),
                     load_eu(GOLD / "petsathome_dog_food.csv", "petsathome"), load_petsmart()], ignore_index=True)
-    dry_matter(df)
+    moisture_medians = dry_matter(df)
     fix_kcal(df)
     range_flags(df)
     add_function_categories(df)
@@ -503,6 +541,8 @@ def main():
     print(f"전체 통합: {df.shape[0]:,}행 × {df.shape[1]}열 → unified_all.csv")
     print(f"Gold: {gold.shape[0]:,}행 × {gold.shape[1]}열 → gold_unified.csv")
     print(pd.DataFrame({"전체": df["출처"].value_counts(), "gold": gold["출처"].value_counts()}).to_string())
+    print(f"\n[건식 수분 추정] {df['수분추정여부'].sum():,}행 (gold {gold['수분추정여부'].sum():,}행), "
+          f"하위 형태별 추정 수분(%): {moisture_medians.to_dict()}")
     print("\n[환산 로그] 속성·규칙별 건수")
     print(log_df.groupby(["속성", "규칙"]).size().to_string())
     print("\n[품질플래그] 상위")
